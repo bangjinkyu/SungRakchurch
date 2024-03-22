@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "823906977154",
+    "project_id": "srapp-327300",
+    "storage_bucket": "srapp-327300.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:823906977154:android:72db917b9e2b048521fb9b",
+        "android_client_info": {
+          "package_name": "app.vercel.srapp_10db2.twa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "823906977154-83eafeuhbo3422mskou422aam95h0nti.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQdQrpoMkpwTSLG1d1_8ED8RBgDsJTM6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "823906977154-83eafeuhbo3422mskou422aam95h0nti.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
