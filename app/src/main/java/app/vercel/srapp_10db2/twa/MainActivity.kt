@@ -90,9 +90,6 @@ class MainActivity : ComponentActivity() {
             Log.d(TAG, "intent.extras link : ${viewModel.weblink }")
         }
 
-       val spf = this.getSharedPreferences("link_name", Context.MODE_PRIVATE)
-        viewModel.weblink = spf.getString("link", "").toString()
-       Log.d(TAG, "spf link: ${viewModel.weblink}")
         setContent {
             MyApp()
         }

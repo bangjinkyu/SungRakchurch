@@ -67,13 +67,6 @@ class SprsFirebaseMessagingService : FirebaseMessagingService() {
 
     private fun sendNotification(data: Map<String, String>, title: String?, body: String?) {
 
-
-        if(data.isNotEmpty()) {
-            val spf = this.getSharedPreferences("link_name", Context.MODE_PRIVATE)
-            val editor = spf.edit()
-            editor.putString("link", data["link"]).apply()
-        }
-
         val intent = Intent(this, MainActivity::class.java).apply {
             flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
