@@ -20,14 +20,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.vercel.srapp_10db2.twa.model.SplashViewModel
 import app.vercel.srapp_10db2.twa.ui.theme.SugnRakchurchTheme
-import com.google.accompanist.web.*
+import com.google.accompanist.web.AccompanistWebChromeClient
+import com.google.accompanist.web.AccompanistWebViewClient
+import com.google.accompanist.web.WebContent
+import com.google.accompanist.web.WebView
+import com.google.accompanist.web.WebViewState
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -44,6 +49,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition { viewModel.isLoading.value }
+        }
+
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            val uri = intent.data
+            if(uri != null) {
+                viewModel.weblink = uri.getQueryParameter("url").toString()
+                Log.d(TAG, "room getIntent: ${viewModel.weblink}")
+            }
         }
 
         //백그라운드

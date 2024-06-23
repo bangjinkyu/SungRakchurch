@@ -52,8 +52,14 @@
 
             </intent-filter>
 
+            <intent-filter>
+              <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-
+                //외부 스키마
+                <data android:host="action" android:scheme="sprsapp"/>
+            </intent-filter>
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
