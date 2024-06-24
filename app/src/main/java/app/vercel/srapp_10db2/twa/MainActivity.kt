@@ -2,16 +2,22 @@ package app.vercel.srapp_10db2.twa
 
 
 import android.Manifest.permission.POST_NOTIFICATIONS
-import android.content.Context
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ActivityNotFoundException
+
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.webkit.ValueCallback
+import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,7 +27,12 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +44,7 @@ import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
+import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -157,10 +169,50 @@ class MainActivity : ComponentActivity() {
         WebViewPage()
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Composable
     fun WebViewPage() {
         Log.d("Firebase", " WebViewPage()")
         Log.d("Firebase", " viewModel ${viewModel.weblink}")
+
+
+        var fileChooserIntent by remember { mutableStateOf<Intent?>(null) }
+
+        val webViewChromeClient = remember {
+            FileUploadWebChromeClient(
+                onShowFilePicker = {
+                    fileChooserIntent = it
+                }
+            )
+        }
+
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data?.data
+                if (data != null) {
+                    // 현재 한개의 데이터만 선택되게 했지만, 멀티 선택인 경우를 고려해도 좋을 것 같아요
+                    webViewChromeClient.selectFiles(arrayOf(data))
+                } else {
+                    webViewChromeClient.cancelFileChooser()
+                }
+            } else {
+                webViewChromeClient.cancelFileChooser()
+            }
+        }
+
+        LaunchedEffect(key1 = fileChooserIntent) {
+            if (fileChooserIntent != null) {
+                try {
+                    launcher.launch(fileChooserIntent)
+                } catch (e: ActivityNotFoundException) {
+                    // 기기에 알맞는 File picker가 없을 경우 취소
+                    webViewChromeClient.cancelFileChooser()
+                }
+            }
+        }
+
         WebView(
             state = WebViewState(
                 WebContent.Url(
@@ -169,7 +221,7 @@ class MainActivity : ComponentActivity() {
                 )
             ),
             client = AccompanistWebViewClient(),
-            chromeClient = AccompanistWebChromeClient(),
+            chromeClient = webViewChromeClient,
             navigator = viewModel.webViewNavigator,
             captureBackPresses = false,
             modifier = Modifier.fillMaxSize(),
@@ -197,6 +249,36 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    class FileUploadWebChromeClient(
+        private val onShowFilePicker: (Intent) -> Unit
+    ): AccompanistWebChromeClient() {
+        private var filePathCallback: ValueCallback<Array<Uri>>? = null
+
+        override fun onShowFileChooser(
+            webView: WebView?,
+            filePathCallback: ValueCallback<Array<Uri>>?,
+            fileChooserParams: FileChooserParams?
+        ): Boolean {
+            this.filePathCallback = filePathCallback
+            val filePickerIntent = fileChooserParams?.createIntent()
+            if (filePickerIntent == null) {
+                cancelFileChooser()
+            } else {
+                onShowFilePicker(filePickerIntent)
+            }
+            return true
+        }
+
+        fun selectFiles(uris: Array<Uri>) {
+            filePathCallback?.onReceiveValue(uris)
+            filePathCallback = null
+        }
+
+        fun cancelFileChooser() {
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
+        }
+    }
 
     @Composable
     fun Greeting(name: String) {
