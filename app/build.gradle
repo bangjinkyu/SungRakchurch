@@ -6,15 +6,15 @@ plugins {
 
 android {
     namespace 'app.vercel.srapp_10db2.twa'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "app.vercel.srapp_10db2.twa"
         minSdk 26
-        targetSdk 33
-        compileSdk 33
-        versionCode 1014
-        versionName "1.0.1.4"
+        targetSdk 34
+        compileSdk 34
+        versionCode 1015
+        versionName "1.0.1.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
