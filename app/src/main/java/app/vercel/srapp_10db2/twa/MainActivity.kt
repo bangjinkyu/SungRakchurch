@@ -2,6 +2,9 @@ package app.vercel.srapp_10db2.twa
 
 
 import android.Manifest.permission.POST_NOTIFICATIONS
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.READ_MEDIA_IMAGES
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -36,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.vercel.srapp_10db2.twa.model.SplashViewModel
 import app.vercel.srapp_10db2.twa.ui.theme.SugnRakchurchTheme
@@ -141,30 +145,34 @@ class MainActivity : ComponentActivity() {
     fun MyApp() {
         val context = LocalContext.current
         val requestPermissionLauncher  = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            if (isGranted) {
-                Log.d("ExampleScreen", "PERMISSION GRANTED")
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { deniedList ->
 
-            } else {
-                Log.d("ExampleScreen", "PERMISSION DENIED")
+            deniedList.entries.forEach {
+                when {
+                    it.value -> {
+                        Log.d(TAG, "PERMISSION GRANTED")
+                    }
 
+                    shouldShowRequestPermissionRationale(it.key) -> {
+                        Log.d(TAG, "Permission required to use app")
+                    }
+
+                    else -> {
+                        Log.d(TAG, "PERMISSION denied")
+                    }
+                }
             }
-
         }
 
-        if (context.checkSelfPermission( POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.d("ExampleScreen", "Code requires permission")
+        if(isAllPermissionsGranted()) {
+            Log.d(TAG, "PERMISSION GRANTED")
 
         } else {
             SideEffect {
-                requestPermissionLauncher.launch(POST_NOTIFICATIONS)
+                requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
             }
         }
-
-
 
         WebViewPage()
     }
@@ -248,6 +256,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun isAllPermissionsGranted(): Boolean = REQUIRED_PERMISSIONS.all { permission ->
+        ActivityCompat.checkSelfPermission(this, permission) ==
+                PackageManager.PERMISSION_GRANTED
+    }
 
     class FileUploadWebChromeClient(
         private val onShowFilePicker: (Intent) -> Unit
@@ -290,6 +302,24 @@ class MainActivity : ComponentActivity() {
     fun DefaultPreview() {
         SugnRakchurchTheme {
             Greeting("Android")
+        }
+    }
+
+    companion object {
+        private val REQUIRED_PERMISSIONS = if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.P){
+            arrayOf(
+                WRITE_EXTERNAL_STORAGE,
+                READ_EXTERNAL_STORAGE
+            )
+        } else if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+            arrayOf(
+                READ_EXTERNAL_STORAGE
+            )
+        } else {
+            arrayOf(
+                POST_NOTIFICATIONS,
+                READ_MEDIA_IMAGES
+            )
         }
     }
 }
